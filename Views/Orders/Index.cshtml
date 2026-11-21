@@ -1,0 +1,34 @@
+@model IEnumerable<proyectoSistemas1.Models.Order>
+@{
+    ViewData["Title"] = "Pedidos";
+}
+
+<h1>Pedidos (últimos 100)</h1>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Cliente</th>
+            <th>Empleado</th>
+            <th>Fecha</th>
+            <th>Envío a</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var o in Model)
+        {
+            <tr>
+                <td>@o.OrderId</td>
+                <td>@o.Customer?.CompanyName</td>
+                <td>@o.Employee?.FirstName @o.Employee?.LastName</td>
+                <td>@o.OrderDate?.ToString("dd/MM/yyyy")</td>
+                <td>@o.ShipCountry</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@o.OrderId" class="btn btn-sm btn-outline-primary">Ver detalle</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

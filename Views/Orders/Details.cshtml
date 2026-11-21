@@ -1,0 +1,100 @@
+@model proyectoSistemas1.Models.Order
+@{
+    ViewData["Title"] = $"Pedido {Model.OrderId}";
+   var total = Model.OrderDetails.Sum(d => d.UnitPrice * d.Quantity * (1 - d.Discount));
+}
+
+<h1>Pedido #@Model.OrderId</h1>
+
+@if (TempData["Error"] is string err)
+{
+    <div class="alert alert-warning">@err</div>
+}
+
+<!-- MAESTRO -->
+<div class="card mb-4">
+    <div class="card-header">Datos del pedido</div>
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-2">Cliente</dt>
+            <dd class="col-sm-4">@Model.Customer?.CompanyName</dd>
+            <dt class="col-sm-2">Empleado</dt>
+            <dd class="col-sm-4">@Model.Employee?.FirstName @Model.Employee?.LastName</dd>
+            <dt class="col-sm-2">Fecha de pedido</dt>
+            <dd class="col-sm-4">@Model.OrderDate?.ToString("dd/MM/yyyy")</dd>
+            <dt class="col-sm-2">Fecha de envío</dt>
+            <dd class="col-sm-4">@Model.ShippedDate?.ToString("dd/MM/yyyy")</dd>
+            <dt class="col-sm-2">Destino</dt>
+            <dd class="col-sm-4">@Model.ShipCity, @Model.ShipCountry</dd>
+            <dt class="col-sm-2">Flete</dt>
+            <dd class="col-sm-4">@Model.Freight?.ToString("C")</dd>
+        </dl>
+    </div>
+</div>
+
+<!-- DETALLE -->
+<h4>Productos del pedido</h4>
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th>Producto</th>
+            <th class="text-end">Precio</th>
+            <th class="text-end">Cantidad</th>
+            <th class="text-end">Descuento</th>
+            <th class="text-end">Subtotal</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var d in Model.OrderDetails)
+        {
+            <tr>
+                <td>@d.Product?.ProductName</td>
+                <td class="text-end">@d.UnitPrice.ToString("C")</td>
+                <td class="text-end">@d.Quantity</td>
+                <td class="text-end">@d.Discount.ToString("P0")</td>
+               <td class="text-end">@((d.UnitPrice * d.Quantity * (1 - d.Discount)).ToString("C"))</td>
+                <td class="text-end">
+                    <form asp-action="DeleteDetail" method="post" class="d-inline">
+                        <input type="hidden" name="orderId" value="@d.OrderId" />
+                        <input type="hidden" name="productId" value="@d.ProductId" />
+                        <button class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar esta línea?')">
+                            Quitar
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            <th colspan="4" class="text-end">Total</th>
+            <th class="text-end">@total.ToString("C")</th>
+            <th></th>
+        </tr>
+    </tfoot>
+</table>
+
+<!-- Agregar línea -->
+<div class="card mt-4">
+    <div class="card-header">Agregar producto</div>
+    <div class="card-body">
+        <form asp-action="AddDetail" method="post" class="row g-2">
+            <input type="hidden" name="orderId" value="@Model.OrderId" />
+            <div class="col-md-5">
+                <select name="productId" class="form-select" asp-items="ViewBag.Products"></select>
+            </div>
+            <div class="col-md-2">
+                <input name="quantity" type="number" min="1" value="1" class="form-control" />
+            </div>
+            <div class="col-md-2">
+                <input name="discount" type="number" step="0.01" min="0" max="1" value="0" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-success">Agregar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<a asp-action="Index" class="btn btn-link mt-3">Volver a la lista</a>
