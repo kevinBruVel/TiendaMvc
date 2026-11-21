@@ -7,7 +7,8 @@ RUN dotnet publish -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 COPY --from=build /app/publish .
-COPY *.db ./
+COPY northwind.db ./northwind.db
+RUN chmod -R 777 /app
 ENV ASPNETCORE_URLS=http://+:8080
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "proyectoSistemas1.dll"]
